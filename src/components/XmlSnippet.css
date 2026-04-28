@@ -1,0 +1,44 @@
+.xml-snippet {
+  background-color: #f5f5f5;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.xml-snippet pre {
+  margin: 0;
+}
+
+.xml-snippet-loading {
+  color: #333;
+  font-style: italic;
+  padding: 1rem;
+}
+
+/* Line numbers using CSS counters */
+.xml-snippet.line-numbers code {
+  counter-reset: line-number calc(var(--line-start, 1) - 1);
+}
+
+.xml-snippet.line-numbers code .line {
+  display: inline-block;
+  width: 100%;
+}
+
+.xml-snippet.line-numbers code .line::before {
+  counter-increment: line-number;
+  content: counter(line-number);
+  display: inline-block;
+  width: 3.5em;
+  margin-right: 1em;
+  padding-right: 0.75em;
+  text-align: right;
+  color: #666;
+  border-right: 2px solid #ccc;
+  user-select: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}

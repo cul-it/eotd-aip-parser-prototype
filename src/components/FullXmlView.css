@@ -1,0 +1,97 @@
+.full-xml-view {
+  margin-top: 2rem;
+}
+
+.full-xml-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  background-color: #f0f0f0;
+  border: 2px solid #000;
+  border-radius: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.full-xml-toggle:hover {
+  background-color: #e0e0e0;
+}
+
+.full-xml-content {
+  margin-top: -2px;
+  border: 2px solid #000;
+  border-top: 1px solid #ccc;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.full-xml-loading {
+  padding: 2rem;
+  color: #333;
+  font-style: italic;
+  text-align: center;
+}
+
+.full-xml-code {
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.full-xml-code pre {
+  margin: 0;
+  padding: 1rem 0;
+}
+
+/* Line numbers */
+.full-xml-code.line-numbers code {
+  counter-reset: line-number calc(var(--line-start, 1) - 1);
+}
+
+.full-xml-code.line-numbers code .line {
+  display: inline-block;
+  width: 100%;
+  padding: 0 1rem 0 0;
+}
+
+.full-xml-code.line-numbers code .line::before {
+  counter-increment: line-number;
+  content: counter(line-number);
+  display: inline-block;
+  width: 3.5em;
+  margin-right: 1em;
+  padding-right: 0.75em;
+  text-align: right;
+  color: #666;
+  border-right: 2px solid #ccc;
+  user-select: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* Highlighted lines — extracted values */
+.full-xml-code .line.highlighted {
+  border-left: 4px solid transparent;
+}
+
+.full-xml-code .line.hl-mods {
+  background-color: rgba(46, 125, 50, 0.12);
+  border-left-color: #1b5e20;
+}
+
+.full-xml-code .line.hl-dim {
+  background-color: rgba(230, 81, 0, 0.12);
+  border-left-color: #bf360c;
+}
+
+.full-xml-code .line.hl-other {
+  background-color: rgba(21, 101, 192, 0.12);
+  border-left-color: #0d47a1;
+}

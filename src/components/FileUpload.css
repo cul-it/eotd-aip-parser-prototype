@@ -1,0 +1,38 @@
+.file-upload {
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.file-upload:hover,
+.file-upload.drag-over {
+  border-color: #4a7ccc;
+  background-color: #f0f5ff;
+}
+
+.file-upload p {
+  margin-bottom: 1rem;
+  color: #000;
+  font-size: 1.35rem;
+}
+
+.file-upload-button {
+  padding: 0.5rem 1.5rem;
+  background-color: #4a7ccc;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.file-upload-button:hover {
+  background-color: #2d5aa0;
+}
+
+.file-upload input[type="file"] {
+  display: none;
+}

@@ -1,0 +1,55 @@
+.mapping-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.mapping-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 1rem;
+  border: 2px solid #000;
+  border-radius: 8px;
+}
+
+.mapping-table th {
+  text-align: left;
+  padding: 1rem 1.25rem;
+  border-bottom: 3px solid #000;
+  border-right: 1px solid #ccc;
+  background-color: #f0f0f0;
+  font-weight: 800;
+  color: #000;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mapping-table th:last-child {
+  border-right: none;
+}
+
+.mapping-table th:nth-child(1) {
+  width: 2.5rem;
+  border-right: none;
+}
+
+.mapping-table th:nth-child(2) {
+  width: 240px;
+  padding-right: 2rem;
+}
+
+.mapping-table th:nth-child(3) {
+  /* Value column takes remaining space */
+}
+
+.mapping-table th:nth-child(4) {
+  width: 140px;
+}
+
+.mapping-table-empty {
+  text-align: center;
+  padding: 2rem;
+  color: #333;
+  font-weight: 600;
+}

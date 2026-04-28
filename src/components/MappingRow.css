@@ -1,0 +1,184 @@
+.mapping-row {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.mapping-row:hover {
+  background-color: #f0f4fa;
+}
+
+.mapping-row.expanded {
+  background-color: #e4ecf7;
+}
+
+.mapping-row.row-highlighted {
+  background-color: #fff9c4;
+}
+
+.mapping-row.row-missing td {
+  color: #666;
+}
+
+.mapping-row td {
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ddd;
+  vertical-align: top;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  color: #111;
+  font-size: 1rem;
+}
+
+.mapping-row td:last-child {
+  border-right: none;
+}
+
+.mapping-row-name {
+  font-weight: 700;
+  white-space: nowrap;
+  color: #000;
+  padding-right: 2rem !important;
+}
+
+.mapping-row-value {
+  line-height: 1.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mapping-row.expanded .mapping-row-value {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.mapping-row-toggle {
+  width: 2.5rem;
+  text-align: center;
+  color: #000;
+  font-size: 1.25rem;
+  font-weight: 800;
+  user-select: none;
+  border-right: none !important;
+}
+
+.mapping-row-expansion td {
+  padding: 0;
+  border-bottom: 3px solid #000;
+}
+
+.mapping-row-expansion-content {
+  padding: 1.25rem 1.25rem 1.25rem 2.5rem;
+  background-color: #f8f8f8;
+}
+
+/* Expansion section headings */
+.expansion-heading {
+  font-size: 0.875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #000;
+  margin: 0 0 0.625rem 0;
+  padding-bottom: 0.375rem;
+  border-bottom: 2px solid #ccc;
+}
+
+.expansion-heading:not(:first-child) {
+  margin-top: 1.25rem;
+}
+
+.expansion-value {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #111;
+  margin-bottom: 0.5rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Nested table for multi-value fields */
+.nested-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+}
+
+.nested-table th {
+  text-align: left;
+  padding: 0.625rem 0.875rem;
+  background-color: #e8e8e8;
+  border-bottom: 2px solid #ccc;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #000;
+}
+
+.nested-table td {
+  padding: 0.5rem 0.875rem;
+  border-bottom: 1px solid #ddd;
+  vertical-align: top;
+  word-wrap: break-word;
+  color: #111;
+}
+
+.nested-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.nested-table tbody tr:hover {
+  background-color: #f0f4fa;
+}
+
+.mapping-row-xpath {
+  font-size: 0.9375rem;
+  color: #111;
+}
+
+.mapping-row-xpath code {
+  font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, monospace;
+  font-size: 0.875rem;
+  background-color: #e8e8e8;
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  color: #000;
+}
+
+/* Source badges */
+.source-badge {
+  display: inline-block;
+  padding: 0.4rem 0.7rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.source-badge.mods {
+  background-color: #c8e6c9;
+  color: #1b5e20;
+}
+
+.source-badge.dim {
+  background-color: #ffe0b2;
+  color: #bf360c;
+}
+
+.source-badge.other {
+  background-color: #bbdefb;
+  color: #0d47a1;
+}
+
+.source-badge.missing {
+  background-color: #ffcdd2;
+  color: #b71c1c;
+}
