@@ -17,7 +17,7 @@ function sourceBadgeClass(schema: string): string {
   return "source-badge other";
 }
 
-function formatValue(fieldResult: FieldResult, value: unknown): string {
+function formatValue(value: unknown): string {
   if (value === null || value === undefined) return "(missing)";
   if (typeof value === "string") return value;
   if (Array.isArray(value)) {
@@ -47,20 +47,20 @@ function getDisplayValue(fieldResult: FieldResult): { value: string; source: Sou
   // Try schemas in priority order
   for (const schema of SCHEMA_PRIORITY) {
     const source = fieldResult.sources.find((s) => s.schema === schema);
-    if (source && hasValue(fieldResult, source)) {
-      return { value: formatValue(fieldResult, source.value), source };
+    if (source && hasValue(source)) {
+      return { value: formatValue(source.value), source };
     }
   }
   // Fallback to any source with a value
   for (const source of fieldResult.sources) {
-    if (hasValue(fieldResult, source)) {
-      return { value: formatValue(fieldResult, source.value), source };
+    if (hasValue(source)) {
+      return { value: formatValue(source.value), source };
     }
   }
   return { value: "(missing)", source: null };
 }
 
-function hasValue(fieldResult: FieldResult, source: SourceResult): boolean {
+function hasValue(source: SourceResult): boolean {
   const v = source.value;
   if (v === null || v === undefined) return false;
   if (typeof v === "string") return v.length > 0;
@@ -121,7 +121,7 @@ function getNestedData(fieldResult: FieldResult, value: unknown): NestedTable | 
 export function MappingRow({ fieldResult, isExpanded, isHighlighted, onToggle }: MappingRowProps) {
   const { value, source } = getDisplayValue(fieldResult);
   const isMissing = source === null;
-  const nonNullSources = fieldResult.sources.filter((s) => hasValue(fieldResult, s));
+  const nonNullSources = fieldResult.sources.filter((s) => hasValue(s));
 
   return (
     <>
@@ -162,7 +162,7 @@ export function MappingRow({ fieldResult, isExpanded, isHighlighted, onToggle }:
                 </thead>
                 <tbody>
                   {fieldResult.sources.map((s) => {
-                    const displayVal = formatValue(fieldResult, s.value);
+                    const displayVal = formatValue(s.value);
                     const nested = getNestedData(fieldResult, s.value);
                     return (
                       <tr key={s.schema}>
