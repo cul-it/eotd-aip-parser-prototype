@@ -158,7 +158,6 @@ export function MappingRow({ fieldResult, isExpanded, isHighlighted, onToggle }:
                   <tr>
                     <th>Schema</th>
                     <th>Value</th>
-                    <th>XPath</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -192,7 +191,6 @@ export function MappingRow({ fieldResult, isExpanded, isHighlighted, onToggle }:
                             <span>{displayVal}</span>
                           )}
                         </td>
-                        <td><code className="comparison-xpath">{s.xpath}</code></td>
                       </tr>
                     );
                   })}
@@ -201,7 +199,7 @@ export function MappingRow({ fieldResult, isExpanded, isHighlighted, onToggle }:
 
               {fieldResult.sources.map((s) => (
                 <div key={s.schema} className="source-xml-block">
-                  <h4 className="expansion-heading">Raw XML — {s.schema}</h4>
+                  <h4 className="expansion-heading">Raw XML {s.schema} <code className="expansion-xpath">{s.xpath}</code></h4>
                   <XmlSnippet xml={s.sourceXml} startLine={s.sourceStartLine} />
                 </div>
               ))}

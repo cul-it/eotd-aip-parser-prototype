@@ -213,10 +213,6 @@
   width: 100px;
 }
 
-.comparison-table th:nth-child(3) {
-  width: 300px;
-}
-
 .comparison-table th {
   text-align: left;
   padding: 0.625rem 0.875rem;
@@ -241,13 +237,17 @@
   border-bottom: none;
 }
 
-.comparison-xpath {
+.expansion-xpath {
   font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, monospace;
   font-size: 0.8125rem;
   background-color: #e8e8e8;
   padding: 0.1875rem 0.5rem;
   border-radius: 4px;
   color: #000;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  margin-left: 0.5rem;
 }
 
 .source-xml-block {
