@@ -41,3 +41,37 @@
 .load-different-file:hover {
   background-color: #111;
 }
+
+.schema-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.schema-legend-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #333;
+  margin-right: 0.25rem;
+}
+
+.schema-legend-desc {
+  font-size: 0.8125rem;
+  color: #555;
+  margin-right: 0.75rem;
+}
+
+.schema-legend-link {
+  font-size: 0.8125rem;
+  color: #1565c0;
+  text-decoration: none;
+  margin-right: 0.75rem;
+}
+
+.schema-legend-link:hover {
+  text-decoration: underline;
+}

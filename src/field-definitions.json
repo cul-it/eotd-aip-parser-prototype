@@ -4,67 +4,125 @@
       "key": "doi",
       "label": "DOI",
       "type": "string",
-      "strategy": "dim",
-      "dim": { "mdschema": "dc", "element": "identifier", "qualifier": "doi" },
-      "xpath": "//dim:field[@mdschema='dc'][@element='identifier'][@qualifier='doi']",
-      "xmlSearch": { "tag": "dim:field", "context": "doi" }
+      "sources": {
+        "MODS": {
+          "strategy": "modsIdentifier",
+          "mods": { "identifierType": "doi" },
+          "xpath": "//mods:identifier[@type='doi']",
+          "xmlSearch": { "tag": "mods:identifier", "context": "doi" }
+        },
+        "DIM": {
+          "strategy": "dim",
+          "dim": { "mdschema": "dc", "element": "identifier", "qualifier": "doi" },
+          "xpath": "//dim:field[@mdschema='dc'][@element='identifier'][@qualifier='doi']",
+          "xmlSearch": { "tag": "dim:field", "context": "doi" }
+        }
+      }
     },
     {
       "key": "handleUrl",
       "label": "Handle URL",
       "type": "string",
-      "strategy": "modsIdentifier",
-      "mods": { "identifierType": "uri" },
-      "xpath": "//mods:identifier[@type='uri']",
-      "xmlSearch": { "tag": "mods:identifier", "context": "uri" }
+      "sources": {
+        "MODS": {
+          "strategy": "modsIdentifier",
+          "mods": { "identifierType": "uri" },
+          "xpath": "//mods:identifier[@type='uri']",
+          "xmlSearch": { "tag": "mods:identifier", "context": "uri" }
+        },
+        "DIM": {
+          "strategy": "dim",
+          "dim": { "mdschema": "dc", "element": "identifier", "qualifier": "uri" },
+          "xpath": "//dim:field[@mdschema='dc'][@element='identifier'][@qualifier='uri']",
+          "xmlSearch": { "tag": "dim:field", "context": "identifier\" qualifier=\"uri" }
+        }
+      }
     },
     {
       "key": "instanceHrid",
       "label": "Instance HRID",
       "type": "string",
-      "strategy": "modsIdentifier",
-      "mods": { "identifierType": "local", "prefix": "bibid:" },
-      "xpath": "//mods:identifier[@type='local'][starts-with(.,'bibid:')]",
-      "xmlSearch": { "tag": "mods:identifier", "context": "bibid" }
+      "sources": {
+        "MODS": {
+          "strategy": "modsIdentifier",
+          "mods": { "identifierType": "local", "prefix": "bibid:" },
+          "xpath": "//mods:identifier[@type='local'][starts-with(.,'bibid:')]",
+          "xmlSearch": { "tag": "mods:identifier", "context": "bibid" }
+        }
+      }
     },
     {
       "key": "title",
       "label": "Title",
       "type": "string",
-      "strategy": "modsPath",
-      "mods": { "path": ["titleInfo", "title"] },
-      "xpath": "//mods:titleInfo/mods:title",
-      "xmlSearch": { "tag": "mods:titleInfo" }
+      "sources": {
+        "MODS": {
+          "strategy": "modsPath",
+          "mods": { "path": ["titleInfo", "title"] },
+          "xpath": "//mods:titleInfo/mods:title",
+          "xmlSearch": { "tag": "mods:titleInfo" }
+        },
+        "DIM": {
+          "strategy": "dim",
+          "dim": { "mdschema": "dc", "element": "title" },
+          "xpath": "//dim:field[@mdschema='dc'][@element='title']",
+          "xmlSearch": { "tag": "dim:field", "context": "element=\"title\"" }
+        }
+      }
     },
     {
       "key": "abstract",
       "label": "Abstract",
       "type": "string",
-      "strategy": "modsPath",
-      "mods": { "path": ["abstract"] },
-      "xpath": "//mods:abstract",
-      "xmlSearch": { "tag": "mods:abstract" }
+      "sources": {
+        "MODS": {
+          "strategy": "modsPath",
+          "mods": { "path": ["abstract"] },
+          "xpath": "//mods:abstract",
+          "xmlSearch": { "tag": "mods:abstract" }
+        },
+        "DIM": {
+          "strategy": "dim",
+          "dim": { "mdschema": "dc", "element": "description", "qualifier": "abstract" },
+          "xpath": "//dim:field[@mdschema='dc'][@element='description'][@qualifier='abstract']",
+          "xmlSearch": { "tag": "dim:field", "context": "qualifier=\"abstract\"" }
+        }
+      }
     },
     {
       "key": "author",
       "label": "Author",
       "type": "string",
-      "strategy": "modsName",
-      "mods": { "role": "author" },
-      "xpath": "//mods:name[mods:role/mods:roleTerm='author']/mods:namePart",
-      "xmlSearch": { "tag": "mods:name" }
+      "sources": {
+        "MODS": {
+          "strategy": "modsName",
+          "mods": { "role": "author" },
+          "xpath": "//mods:name[mods:role/mods:roleTerm='author']/mods:namePart",
+          "xmlSearch": { "tag": "mods:name" }
+        },
+        "DIM": {
+          "strategy": "dim",
+          "dim": { "mdschema": "dc", "element": "contributor", "qualifier": "author" },
+          "xpath": "//dim:field[@mdschema='dc'][@element='contributor'][@qualifier='author']",
+          "xmlSearch": { "tag": "dim:field", "context": "contributor\" qualifier=\"author" }
+        }
+      }
     },
     {
       "key": "committeeMembers",
       "label": "Committee Members",
       "type": "array",
-      "strategy": "dimMulti",
-      "dim": [
-        { "mdschema": "dc", "element": "contributor", "qualifier": "chair", "role": "chair" },
-        { "mdschema": "dc", "element": "contributor", "qualifier": "committeeMember", "role": "member" }
-      ],
-      "xpath": "//dim:field[@element='contributor'][@qualifier='chair' or @qualifier='committeeMember']",
-      "xmlSearch": { "tag": "dim:field", "contexts": ["chair", "committeeMember"] },
+      "sources": {
+        "DIM": {
+          "strategy": "dimMulti",
+          "dim": [
+            { "mdschema": "dc", "element": "contributor", "qualifier": "chair", "role": "chair" },
+            { "mdschema": "dc", "element": "contributor", "qualifier": "committeeMember", "role": "member" }
+          ],
+          "xpath": "//dim:field[@element='contributor'][@qualifier='chair' or @qualifier='committeeMember']",
+          "xmlSearch": { "tag": "dim:field", "contexts": ["chair", "committeeMember"] }
+        }
+      },
       "display": {
         "nested": {
           "headers": ["Name", "Role"],
@@ -76,27 +134,47 @@
       "key": "community",
       "label": "Community",
       "type": "string",
-      "strategy": "custom",
-      "customExtractor": "community",
-      "xpath": "//structMap[@LABEL='Parent']//mptr/@xlink:href",
-      "xmlSearch": { "tag": "mptr", "context": "HANDLE" }
+      "sources": {
+        "METS": {
+          "strategy": "custom",
+          "customExtractor": "community",
+          "xpath": "//structMap[@LABEL='Parent']//mptr/@xlink:href",
+          "xmlSearch": { "tag": "mptr", "context": "HANDLE" }
+        }
+      }
     },
     {
       "key": "collection",
       "label": "Collection",
       "type": "string",
-      "strategy": "dim",
-      "dim": { "mdschema": "cris", "element": "virtual", "qualifier": "collection", "includeAuthority": true },
-      "xpath": "//dim:field[@mdschema='cris'][@element='virtual'][@qualifier='collection']",
-      "xmlSearch": { "tag": "dim:field", "context": "cris" }
+      "sources": {
+        "DIM": {
+          "strategy": "dim",
+          "dim": { "mdschema": "cris", "element": "virtual", "qualifier": "collection", "includeAuthority": true },
+          "xpath": "//dim:field[@mdschema='cris'][@element='virtual'][@qualifier='collection']",
+          "xmlSearch": { "tag": "dim:field", "context": "cris" }
+        }
+      }
     },
     {
       "key": "keywords",
       "label": "Keywords",
       "type": "array",
-      "strategy": "modsSubjects",
-      "xpath": "//mods:subject/mods:topic",
-      "xmlSearch": { "tag": "mods:subject", "all": true },
+      "sources": {
+        "MODS": {
+          "strategy": "modsSubjects",
+          "xpath": "//mods:subject/mods:topic",
+          "xmlSearch": { "tag": "mods:subject", "all": true }
+        },
+        "DIM": {
+          "strategy": "dimMulti",
+          "dim": [
+            { "mdschema": "dc", "element": "subject" }
+          ],
+          "xpath": "//dim:field[@mdschema='dc'][@element='subject']",
+          "xmlSearch": { "tag": "dim:field", "context": "element=\"subject\"" }
+        }
+      },
       "display": {
         "nested": {
           "headers": ["Keyword"]
@@ -107,31 +185,55 @@
       "key": "datePublished",
       "label": "Date Published",
       "type": "string",
-      "strategy": "modsPath",
-      "mods": { "path": ["originInfo", "dateIssued"] },
-      "xpath": "//mods:originInfo/mods:dateIssued",
-      "xmlSearch": { "tag": "mods:originInfo" }
+      "sources": {
+        "MODS": {
+          "strategy": "modsPath",
+          "mods": { "path": ["originInfo", "dateIssued"] },
+          "xpath": "//mods:originInfo/mods:dateIssued",
+          "xmlSearch": { "tag": "mods:originInfo" }
+        },
+        "DIM": {
+          "strategy": "dim",
+          "dim": { "mdschema": "dc", "element": "date", "qualifier": "issued" },
+          "xpath": "//dim:field[@mdschema='dc'][@element='date'][@qualifier='issued']",
+          "xmlSearch": { "tag": "dim:field", "context": "date\" qualifier=\"issued" }
+        }
+      }
     },
     {
       "key": "dateAddedToEcommons",
       "label": "Date Added to eCommons",
       "type": "string",
-      "strategy": "modsExtension",
-      "mods": { "extensionField": "dateAccessioned" },
-      "xpath": "//mods:extension/mods:dateAccessioned",
-      "xmlSearch": { "tag": "mods:dateAccessioned" }
+      "sources": {
+        "MODS": {
+          "strategy": "modsExtension",
+          "mods": { "extensionField": "dateAccessioned" },
+          "xpath": "//mods:extension/mods:dateAccessioned",
+          "xmlSearch": { "tag": "mods:dateAccessioned" }
+        },
+        "DIM": {
+          "strategy": "dim",
+          "dim": { "mdschema": "dc", "element": "date", "qualifier": "accessioned" },
+          "xpath": "//dim:field[@mdschema='dc'][@element='date'][@qualifier='accessioned']",
+          "xmlSearch": { "tag": "dim:field", "context": "date\" qualifier=\"accessioned" }
+        }
+      }
     },
     {
       "key": "bitstreams",
       "label": "Content Files / Bitstreams",
       "type": "bitstreams",
-      "strategy": "custom",
-      "customExtractor": "bitstreams",
-      "config": {
-        "useTypes": ["ORIGINAL", "LICENSE", "CC-LICENSE"]
+      "sources": {
+        "METS": {
+          "strategy": "custom",
+          "customExtractor": "bitstreams",
+          "config": {
+            "useTypes": ["ORIGINAL", "LICENSE", "CC-LICENSE"]
+          },
+          "xpath": "//fileSec/fileGrp[@USE='ORIGINAL' or @USE='LICENSE' or @USE='CC-LICENSE']/file",
+          "xmlSearch": { "tag": "fileGrp", "contexts": ["ORIGINAL", "LICENSE", "CC-LICENSE"] }
+        }
       },
-      "xpath": "//fileSec/fileGrp[@USE='ORIGINAL' or @USE='LICENSE' or @USE='CC-LICENSE']/file",
-      "xmlSearch": { "tag": "fileGrp", "contexts": ["ORIGINAL", "LICENSE", "CC-LICENSE"] },
       "display": {
         "nested": {
           "headers": ["Use", "Filename", "MIME Type", "Size", "Checksum"]
@@ -142,41 +244,58 @@
       "key": "license",
       "label": "License",
       "type": "string",
-      "strategy": "modsAccessCondition",
-      "mods": { "conditionType": "useAndReproduction" },
-      "fallback": { "strategy": "dim", "dim": { "mdschema": "dc", "element": "rights" } },
-      "xpath": "//mods:accessCondition[@type='useAndReproduction']",
-      "xmlSearch": { "tag": "mods:accessCondition", "all": true }
+      "sources": {
+        "MODS": {
+          "strategy": "modsAccessCondition",
+          "mods": { "conditionType": "useAndReproduction" },
+          "xpath": "//mods:accessCondition[@type='useAndReproduction']",
+          "xmlSearch": { "tag": "mods:accessCondition", "all": true }
+        },
+        "DIM": {
+          "strategy": "dim",
+          "dim": { "mdschema": "dc", "element": "rights" },
+          "xpath": "//dim:field[@mdschema='dc'][@element='rights']",
+          "xmlSearch": { "tag": "dim:field", "context": "rights" }
+        }
+      }
     },
     {
       "key": "embargo",
       "label": "Embargo",
       "type": "string",
-      "strategy": "custom",
-      "customExtractor": "embargo",
-      "config": {
-        "permanentThresholdYears": 100
-      },
-      "xpath": "//dim:field[@element='description'][@qualifier='embargo']",
-      "xmlSearch": { "tag": "dim:field", "context": "embargo" }
+      "sources": {
+        "DIM": {
+          "strategy": "custom",
+          "customExtractor": "embargo",
+          "config": {
+            "permanentThresholdYears": 100
+          },
+          "xpath": "//dim:field[@element='description'][@qualifier='embargo']",
+          "xmlSearch": { "tag": "dim:field", "context": "embargo" }
+        }
+      }
     },
     {
       "key": "redaction",
       "label": "Redaction",
       "type": "string",
-      "strategy": "custom",
-      "customExtractor": "redaction",
-      "config": {
-        "provenanceSources": [
-          { "mdschema": "dc", "element": "description", "qualifier": "provenance" },
-          { "mdschema": "dc", "element": "provenance" }
-        ],
-        "keywords": ["redact", "removed"],
-        "bitstreamKeywords": ["redact"],
-        "replacesField": { "mdschema": "dc", "element": "relation", "qualifier": "replaces" }
-      },
-      "xpath": "//dim:field[@element='description'][@qualifier='provenance'][contains(.,'redact')] | //dim:field[@element='relation'][@qualifier='replaces']",
-      "xmlSearch": { "tag": "dim:field", "context": "redact" }
+      "sources": {
+        "DIM": {
+          "strategy": "custom",
+          "customExtractor": "redaction",
+          "config": {
+            "provenanceSources": [
+              { "mdschema": "dc", "element": "description", "qualifier": "provenance" },
+              { "mdschema": "dc", "element": "provenance" }
+            ],
+            "keywords": ["redact", "removed"],
+            "bitstreamKeywords": ["redact"],
+            "replacesField": { "mdschema": "dc", "element": "relation", "qualifier": "replaces" }
+          },
+          "xpath": "//dim:field[@element='description'][@qualifier='provenance'][contains(.,'redact')] | //dim:field[@element='relation'][@qualifier='replaces']",
+          "xmlSearch": { "tag": "dim:field", "context": "redact" }
+        }
+      }
     }
   ]
 }

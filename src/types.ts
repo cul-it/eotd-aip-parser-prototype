@@ -47,3 +47,20 @@ export interface DisplayRow {
   sourceStartLine: number; // 1-based line number in the original file
   nestedData?: NestedTable;
 }
+
+export interface SourceResult {
+  schema: string;
+  value: unknown;
+  xpath: string;
+  sourceXml: string;
+  sourceStartLine: number;
+}
+
+export interface FieldResult {
+  key: string;
+  label: string;
+  type: string;
+  sources: SourceResult[];
+  hasDiscrepancy: boolean;
+  display?: { nested?: { headers: string[]; roleColumn?: boolean } };
+}

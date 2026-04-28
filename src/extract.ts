@@ -1,5 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
-import type { AccessInfo, Bitstream, DisplayRow, NestedTable, ParsedItem } from "./types";
+import type { AccessInfo, Bitstream, ParsedItem, SourceResult, FieldResult } from "./types";
 import fieldDefs from "./field-definitions.json";
 
 // ---------------------------------------------------------------------------
@@ -40,18 +40,21 @@ interface XmlSearchDef {
   all?: boolean;
 }
 
-interface FieldDef {
-  key: string;
-  label: string;
-  type: string;
+interface SourceDef {
   strategy: string;
   mods?: Record<string, unknown>;
   dim?: DimQuery | DimQuery[];
-  fallback?: { strategy: string; dim: DimQuery };
   customExtractor?: string;
   config?: Record<string, unknown>;
   xpath: string;
   xmlSearch: XmlSearchDef;
+}
+
+interface FieldDef {
+  key: string;
+  label: string;
+  type: string;
+  sources: Record<string, SourceDef>;
   display?: { nested?: { headers: string[]; roleColumn?: boolean } };
 }
 
@@ -158,33 +161,33 @@ interface ExtractContext {
   parsed: MetsDoc;
 }
 
-function extractByStrategy(def: FieldDef, ctx: ExtractContext): unknown {
-  switch (def.strategy) {
+function extractByStrategy(source: SourceDef, ctx: ExtractContext): unknown {
+  switch (source.strategy) {
     case "dim":
-      return extractDimStrategy(def, ctx);
+      return extractDimStrategy(source, ctx);
     case "dimMulti":
-      return extractDimMultiStrategy(def, ctx);
+      return extractDimMultiStrategy(source, ctx);
     case "modsPath":
-      return extractModsPathStrategy(def, ctx);
+      return extractModsPathStrategy(source, ctx);
     case "modsName":
-      return extractModsNameStrategy(def, ctx);
+      return extractModsNameStrategy(source, ctx);
     case "modsIdentifier":
-      return extractModsIdentifierStrategy(def, ctx);
+      return extractModsIdentifierStrategy(source, ctx);
     case "modsSubjects":
       return extractModsSubjectsStrategy(ctx);
     case "modsExtension":
-      return extractModsExtensionStrategy(def, ctx);
+      return extractModsExtensionStrategy(source, ctx);
     case "modsAccessCondition":
-      return extractModsAccessConditionStrategy(def, ctx);
+      return extractModsAccessConditionStrategy(source, ctx);
     case "custom":
-      return extractCustomStrategy(def, ctx);
+      return extractCustomStrategy(source, ctx);
     default:
       return null;
   }
 }
 
-function extractDimStrategy(def: FieldDef, ctx: ExtractContext): string | null {
-  const q = def.dim as DimQuery;
+function extractDimStrategy(source: SourceDef, ctx: ExtractContext): string | null {
+  const q = source.dim as DimQuery;
   if (q.includeAuthority) {
     const results = dimFieldsQuery(ctx.dim, q);
     if (results.length === 0) return null;
@@ -193,15 +196,11 @@ function extractDimStrategy(def: FieldDef, ctx: ExtractContext): string | null {
     const authority = f["@_authority"] ?? "";
     return authority ? `${name} (${authority})` : name;
   }
-  let result = dimText(ctx.dim, q);
-  if (!result && def.fallback) {
-    result = dimText(ctx.dim, def.fallback.dim);
-  }
-  return result;
+  return dimText(ctx.dim, q);
 }
 
-function extractDimMultiStrategy(def: FieldDef, ctx: ExtractContext): string[] {
-  const queries = def.dim as DimQuery[];
+function extractDimMultiStrategy(source: SourceDef, ctx: ExtractContext): string[] {
+  const queries = source.dim as DimQuery[];
   const results: string[] = [];
   for (const q of queries) {
     const texts = dimTexts(ctx.dim, q);
@@ -214,9 +213,9 @@ function extractDimMultiStrategy(def: FieldDef, ctx: ExtractContext): string[] {
   return results;
 }
 
-function extractModsPathStrategy(def: FieldDef, ctx: ExtractContext): string | null {
+function extractModsPathStrategy(source: SourceDef, ctx: ExtractContext): string | null {
   if (!ctx.mods) return null;
-  const path = (def.mods as { path: string[] }).path;
+  const path = (source.mods as { path: string[] }).path;
   let current: unknown = ctx.mods;
   for (const segment of path) {
     if (current === null || current === undefined || typeof current !== "object") return null;
@@ -225,9 +224,9 @@ function extractModsPathStrategy(def: FieldDef, ctx: ExtractContext): string | n
   return textOf(current) || null;
 }
 
-function extractModsNameStrategy(def: FieldDef, ctx: ExtractContext): string | null {
+function extractModsNameStrategy(source: SourceDef, ctx: ExtractContext): string | null {
   if (!ctx.mods) return null;
-  const role = (def.mods as { role: string }).role;
+  const role = (source.mods as { role: string }).role;
   const names = asArray(ctx.mods["name"] as Record<string, unknown>[]);
   for (const name of names) {
     const roleEl = name["role"] as Record<string, unknown> | undefined;
@@ -243,9 +242,9 @@ function extractModsNameStrategy(def: FieldDef, ctx: ExtractContext): string | n
   return null;
 }
 
-function extractModsIdentifierStrategy(def: FieldDef, ctx: ExtractContext): string | null {
+function extractModsIdentifierStrategy(source: SourceDef, ctx: ExtractContext): string | null {
   if (!ctx.mods) return null;
-  const config = def.mods as { identifierType: string; prefix?: string };
+  const config = source.mods as { identifierType: string; prefix?: string };
   const identifiers = asArray(ctx.mods["identifier"] as Record<string, unknown>[]);
   for (const id of identifiers) {
     if (id["@_type"] === config.identifierType) {
@@ -270,9 +269,9 @@ function extractModsSubjectsStrategy(ctx: ExtractContext): string[] {
     .filter((t) => t.length > 0);
 }
 
-function extractModsExtensionStrategy(def: FieldDef, ctx: ExtractContext): string | null {
+function extractModsExtensionStrategy(source: SourceDef, ctx: ExtractContext): string | null {
   if (!ctx.mods) return null;
-  const field = (def.mods as { extensionField: string }).extensionField;
+  const field = (source.mods as { extensionField: string }).extensionField;
   const extensions = asArray(ctx.mods["extension"] as Record<string, unknown>[]);
   for (const ext of extensions) {
     const val = ext[field];
@@ -281,32 +280,26 @@ function extractModsExtensionStrategy(def: FieldDef, ctx: ExtractContext): strin
   return null;
 }
 
-function extractModsAccessConditionStrategy(def: FieldDef, ctx: ExtractContext): string | null {
-  if (!ctx.mods) {
-    // Try fallback
-    if (def.fallback) return dimText(ctx.dim, def.fallback.dim);
-    return null;
-  }
-  const condType = (def.mods as { conditionType: string }).conditionType;
+function extractModsAccessConditionStrategy(source: SourceDef, ctx: ExtractContext): string | null {
+  if (!ctx.mods) return null;
+  const condType = (source.mods as { conditionType: string }).conditionType;
   const conditions = asArray(ctx.mods["accessCondition"] as Record<string, unknown>[]);
   const match = conditions.find((c) => c["@_type"] === condType);
   if (match) return textOf(match) || null;
   if (conditions.length > 0) return textOf(conditions[0]) || null;
-  // Fallback to DIM
-  if (def.fallback) return dimText(ctx.dim, def.fallback.dim);
   return null;
 }
 
-function extractCustomStrategy(def: FieldDef, ctx: ExtractContext): unknown {
-  switch (def.customExtractor) {
+function extractCustomStrategy(source: SourceDef, ctx: ExtractContext): unknown {
+  switch (source.customExtractor) {
     case "community":
       return extractCommunity(ctx.parsed);
     case "bitstreams":
-      return extractBitstreams(ctx.parsed, def.config);
+      return extractBitstreams(ctx.parsed, source.config);
     case "embargo":
-      return extractEmbargo(ctx.dim, def.config);
+      return extractEmbargo(ctx.dim, source.config);
     case "redaction":
-      return extractRedaction(ctx.dim, ctx.parsed, def.config);
+      return extractRedaction(ctx.dim, ctx.parsed, source.config);
     default:
       return null;
   }
@@ -435,20 +428,55 @@ function extractRedaction(
 }
 
 // ---------------------------------------------------------------------------
+// Discrepancy detection
+// ---------------------------------------------------------------------------
+
+function stringifyValue(value: unknown): string | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    const sorted = [...value].map((v) => (typeof v === "string" ? v : JSON.stringify(v))).sort();
+    return JSON.stringify(sorted);
+  }
+  return JSON.stringify(value);
+}
+
+function computeDiscrepancy(sources: SourceResult[]): boolean {
+  const nonNullValues = sources
+    .map((s) => stringifyValue(s.value))
+    .filter((v): v is string => v !== null);
+  if (nonNullValues.length < 2) return false;
+  return nonNullValues.some((v) => v !== nonNullValues[0]);
+}
+
+// ---------------------------------------------------------------------------
 // Main extraction: build ParsedItem from field definitions
 // ---------------------------------------------------------------------------
 
 export function extractParsedItem(parsed: MetsDoc): ParsedItem {
+  const primarySchema = "MODS";
   const mods = findModsSection(parsed);
   const dim = findDimSection(parsed);
   const ctx: ExtractContext = { mods, dim, parsed };
 
   const values = new Map<string, unknown>();
   for (const def of fields) {
-    values.set(def.key, extractByStrategy(def, ctx));
+    const primarySource = def.sources[primarySchema];
+    let value: unknown = null;
+    if (primarySource) {
+      value = extractByStrategy(primarySource, ctx);
+    }
+    if (value === null || value === undefined) {
+      for (const [schema, sourceDef] of Object.entries(def.sources)) {
+        if (schema === primarySchema) continue;
+        value = extractByStrategy(sourceDef, ctx);
+        if (value !== null && value !== undefined) break;
+      }
+    }
+    values.set(def.key, value);
   }
 
-  // Assemble ParsedItem from extracted values
+  // The rest of ParsedItem assembly stays the same
   const embargo = values.get("embargo") as EmbargoResult | null;
   const redaction = values.get("redaction") as RedactionResult | null;
 
@@ -478,31 +506,12 @@ export function extractParsedItem(parsed: MetsDoc): ParsedItem {
 }
 
 // ---------------------------------------------------------------------------
-// Convert ParsedItem → DisplayRow[] for the table UI
+// Extract all sources for comparison UI
 // ---------------------------------------------------------------------------
 
 interface XmlBlockResult {
   xml: string;
   startLine: number;
-}
-
-function displayRow(
-  name: string,
-  value: string | null,
-  source: string,
-  xpath: string,
-  block: XmlBlockResult,
-  nestedData?: NestedTable,
-): DisplayRow {
-  return {
-    name,
-    value: value ?? "(missing)",
-    source: value === null ? "missing" : source,
-    xpath,
-    sourceXml: block.xml || "(no source element)",
-    sourceStartLine: block.startLine,
-    nestedData,
-  };
 }
 
 function lineAt(rawXml: string, charOffset: number): number {
@@ -523,112 +532,39 @@ function getSourceBlock(rawXml: string, search: XmlSearchDef): XmlBlockResult {
   return xmlBlock(rawXml, search.tag, search.context);
 }
 
-function getDisplayValue(def: FieldDef, item: ParsedItem): string | null {
-  switch (def.key) {
-    case "committeeMembers":
-      return item.committeeMembers.length > 0 ? item.committeeMembers.join("; ") : null;
-    case "keywords":
-      return item.keywords.length > 0 ? item.keywords.join("; ") : null;
-    case "bitstreams":
-      return item.bitstreams.length > 0
-        ? item.bitstreams.map((b) => `[${b.use}] ${b.filename}`).join("; ")
-        : null;
-    case "embargo": {
-      if (item.access.embargoType === "permanent") return `Permanent (${item.access.embargoDate})`;
-      if (item.access.embargoType === "temporary") return `Temporary — lifts ${item.access.embargoDate}`;
-      return null;
-    }
-    case "redaction": {
-      if (!item.access.isRedacted) return null;
-      const parts: string[] = [];
-      if (item.access.redactionNote) parts.push(item.access.redactionNote);
-      if (item.access.replacesHandle) parts.push(`Replaces: ${item.access.replacesHandle}`);
-      return parts.join(" | ") || "Yes";
-    }
-    case "license":
-      return item.access.license;
-    default: {
-      const val = item[def.key as keyof ParsedItem];
-      if (val === null || val === undefined) return null;
-      if (typeof val === "string") return val;
-      return null;
-    }
-  }
-}
+export function extractAllSources(
+  rawXml: string,
+  parsed: MetsDoc
+): FieldResult[] {
+  const mods = findModsSection(parsed);
+  const dim = findDimSection(parsed);
+  const ctx: ExtractContext = { mods, dim, parsed };
 
-function getSource(def: FieldDef, value: string | null): string {
-  if (value === null) return "missing";
-  switch (def.strategy) {
-    case "modsPath":
-    case "modsName":
-    case "modsIdentifier":
-    case "modsSubjects":
-    case "modsExtension":
-      return "MODS";
-    case "modsAccessCondition":
-      return "MODS";
-    case "dim":
-    case "dimMulti":
-      return "DIM";
-    case "custom":
-      if (def.customExtractor === "community") return "METS";
-      if (def.customExtractor === "bitstreams") return "METS/PREMIS";
-      return "DIM";
-    default:
-      return "DIM";
-  }
-}
+  return fields.map((def) => {
+    const sources: SourceResult[] = [];
 
-function getNestedData(def: FieldDef, item: ParsedItem): NestedTable | undefined {
-  if (!def.display?.nested) return undefined;
-  const headers = def.display.nested.headers;
+    for (const [schema, sourceDef] of Object.entries(def.sources)) {
+      const value = extractByStrategy(sourceDef, ctx);
+      const block = getSourceBlock(rawXml, sourceDef.xmlSearch);
 
-  switch (def.key) {
-    case "committeeMembers": {
-      if (item.committeeMembers.length === 0) return undefined;
-      return {
-        headers,
-        rows: item.committeeMembers.map((m) => {
-          const isChair = m.endsWith("(chair)");
-          const name = isChair ? m.replace(/ \(chair\)$/, "") : m;
-          return [name, isChair ? "Chair" : "Member"];
-        }),
-      };
+      sources.push({
+        schema,
+        value,
+        xpath: sourceDef.xpath,
+        sourceXml: block.xml,
+        sourceStartLine: block.startLine,
+      });
     }
-    case "keywords": {
-      if (item.keywords.length === 0) return undefined;
-      return { headers, rows: item.keywords.map((k) => [k]) };
-    }
-    case "bitstreams": {
-      if (item.bitstreams.length === 0) return undefined;
-      return {
-        headers,
-        rows: item.bitstreams.map((b) => [
-          b.use,
-          b.filename,
-          b.mimeType,
-          `${(b.size / 1024).toFixed(1)} KB`,
-          `${b.checksumType}:${b.checksum}`,
-        ]),
-      };
-    }
-    default:
-      return undefined;
-  }
-}
 
-export function parsedItemToDisplayRows(item: ParsedItem, rawXml: string): DisplayRow[] {
-  const rows: DisplayRow[] = [];
-
-  for (const def of fields) {
-    const value = getDisplayValue(def, item);
-    const source = getSource(def, value);
-    const block = getSourceBlock(rawXml, def.xmlSearch);
-    const nested = getNestedData(def, item);
-    rows.push(displayRow(def.label, value, source, def.xpath, block, nested));
-  }
-
-  return rows;
+    return {
+      key: def.key,
+      label: def.label,
+      type: def.type,
+      sources,
+      hasDiscrepancy: computeDiscrepancy(sources),
+      display: def.display,
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -733,10 +669,10 @@ function escapeRegex(s: string): string {
 
 export function extractMappings(
   _doc: Document,
-  rawXml: string
-): { item: ParsedItem; rows: DisplayRow[] } {
+  rawXml: string,
+): { item: ParsedItem; fieldResults: FieldResult[] } {
   const parsed = parser.parse(rawXml) as MetsDoc;
   const item = extractParsedItem(parsed);
-  const rows = parsedItemToDisplayRows(item, rawXml);
-  return { item, rows };
+  const fieldResults = extractAllSources(rawXml, parsed);
+  return { item, fieldResults };
 }
