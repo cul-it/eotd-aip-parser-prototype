@@ -134,14 +134,8 @@
       "key": "community",
       "label": "Community",
       "type": "string",
-      "sources": {
-        "METS": {
-          "strategy": "custom",
-          "customExtractor": "community",
-          "xpath": "//structMap[@LABEL='Parent']//mptr/@xlink:href",
-          "xmlSearch": { "tag": "mptr", "context": "HANDLE" }
-        }
-      }
+      "hardcoded": "Not currently exposed in AIP",
+      "sources": {}
     },
     {
       "key": "collection",
@@ -172,7 +166,7 @@
             { "mdschema": "dc", "element": "subject" }
           ],
           "xpath": "//dim:field[@mdschema='dc'][@element='subject']",
-          "xmlSearch": { "tag": "dim:field", "context": "element=\"subject\"" }
+          "xmlSearch": { "tag": "dim:field", "contexts": ["element=\"subject\""] }
         }
       },
       "display": {

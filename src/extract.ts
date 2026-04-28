@@ -55,6 +55,7 @@ interface FieldDef {
   label: string;
   type: string;
   sources: Record<string, SourceDef>;
+  hardcoded?: string;
   display?: { nested?: { headers: string[]; roleColumn?: boolean } };
 }
 
@@ -461,6 +462,10 @@ export function extractParsedItem(parsed: MetsDoc): ParsedItem {
 
   const values = new Map<string, unknown>();
   for (const def of fields) {
+    if (def.hardcoded) {
+      values.set(def.key, def.hardcoded);
+      continue;
+    }
     const primarySource = def.sources[primarySchema];
     let value: unknown = null;
     if (primarySource) {
@@ -541,6 +546,23 @@ export function extractAllSources(
   const ctx: ExtractContext = { mods, dim, parsed };
 
   return fields.map((def) => {
+    if (def.hardcoded) {
+      return {
+        key: def.key,
+        label: def.label,
+        type: def.type,
+        sources: [{
+          schema: "N/A",
+          value: def.hardcoded,
+          xpath: "",
+          sourceXml: "",
+          sourceStartLine: 0,
+        }],
+        hasDiscrepancy: false,
+        display: def.display,
+      };
+    }
+
     const sources: SourceResult[] = [];
 
     for (const [schema, sourceDef] of Object.entries(def.sources)) {
